@@ -9,11 +9,11 @@ from .views import UserViewSet, TicketViewSet, CategoryViewSet
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
+router.register(r'api/users', UserViewSet)
 
-router.register(r'tickets', TicketViewSet)
+router.register(r'api/tickets', TicketViewSet)
 
-router.register(r'category', CategoryViewSet)
+router.register(r'api/category', CategoryViewSet)
 
 app_name = 'tickets'
 

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db import models
 # Create your models here.
 
-User = settings.AUTH_USER_MODEL
+from django.contrib.auth.models import User
 
 
 def generate_ticket_id():
@@ -23,12 +23,23 @@ class Category(models.Model):
 
 
 class Ticket(models.Model):
+    status = (
+        ("Open", "open"),
+        ("PROGRESS", "progress"),
+        ("PENDING", "pending"),
+        ("HOLD", "hold"),
+        ("REOPEN", "reopen"),
+        ("RESOLVED", "resolved"),
+        ("CLOSED", "closed"),
+    )
+
     title = models.CharField(max_length=255)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ticket_created')
     content = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='ticket_category')
     ticket_id = models.CharField(max_length=255, blank=True)
-    assign = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ticket_assign')
+    assign = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='ticket_assign')
+    status = models.CharField(choices=status, max_length=155, default="pending")
     created = models.DateTimeField(auto_now=True)
     modified = models.DateTimeField(auto_now_add=True)
 
