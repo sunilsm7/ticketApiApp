@@ -16,7 +16,7 @@ class Category(models.Model):
     slug = models.SlugField()
 
     class Meta:
-        verbose_name_plural = 'Category'
+        verbose_name_plural = '01 Category'
 
     def __str__(self):
         return self.name
@@ -34,17 +34,17 @@ class Ticket(models.Model):
     )
 
     title = models.CharField(max_length=255)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ticket_created')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ticket_created')
     content = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='ticket_category')
     ticket_id = models.CharField(max_length=255, blank=True)
-    assign = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='ticket_assign')
+    assign = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='ticket_assign')
     status = models.CharField(choices=status, max_length=155, default="pending")
     created = models.DateTimeField(auto_now=True)
     modified = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name_plural = 'Ticket'
+        verbose_name_plural = '02 Ticket'
         ordering = ["-created"]
 
     def __str__(self):
@@ -55,3 +55,27 @@ class Ticket(models.Model):
             self.ticket_id = generate_ticket_id()
 
         super(Ticket, self).save(*args, **kwargs)
+
+    @property
+    def get_comments(self):
+        qs = self.comments.all()
+        return qs
+
+
+class Comment(models.Model):
+    user    = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=1)
+    ticket    = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    parent  = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    updated = models.DateTimeField(auto_now=True, auto_now_add=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name_plural = '03 Comments'
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return '{} {}'.format(self.user, self.content, self.parent)
+
+    def has_replies(self):
+        return Comment.objects.filter(parent=self)
