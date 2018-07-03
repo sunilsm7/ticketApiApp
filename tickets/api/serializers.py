@@ -12,18 +12,40 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='tickets:tickets-detail', lookup_field='slug')
     user = serializers.SerializerMethodField()
     assign = serializers.SerializerMethodField()
+    owner = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Ticket
-        fields = ('id', 'title', 'ticket_id', 'user', 'status', 'content', 'assign', 'category', 'created', 'modified')
+        fields = [
+            'url',
+            'slug',
+            'title',
+            'ticket_id',
+            'user',
+            'owner',
+            'status',
+            'content',
+            'assign',
+            'category',
+            'created',
+            'modified'
+        ]
 
     def get_user(self, obj):
         return obj.user.username
 
     def get_assign(self, obj):
         return obj.user.username
+
+    def get_owner(self, obj):
+        request = self.context['request']
+        if request.user.is_authenticated:
+            if obj.user == request.user:
+                return True
+            return False
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -34,11 +56,13 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     replies_count = serializers.SerializerMethodField()
+    url = serializers.HyperlinkedIdentityField(view_name='tickets:comment-detail')
     user = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
         fields = [
+            'url',
             'id',
             'user',
             'ticket',

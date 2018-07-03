@@ -16,11 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path, include
 from rest_framework_jwt.views import obtain_jwt_token
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^api/auth/login/$', obtain_jwt_token, name='api-login'),
-    re_path(r'', include('tickets.api.urls', namespace='tickets')),
-    path(r'api/', include('rest_framework.urls', namespace='rest_framework'))
-
+    re_path(r'api/auth/login/$', obtain_jwt_token, name='api-login'),
+    re_path(r'api/tickets-api/', include('tickets.api.urls', namespace='tickets')),
+    path(r'api/', include('rest_framework.urls', namespace='rest_framework')),
+    re_path('.*', TemplateView.as_view(template_name='index.html')),
 ]

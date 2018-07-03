@@ -1,6 +1,8 @@
 import uuid
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import pre_save
+from .utils import unique_slug_generator
 # Create your models here.
 
 # from django.contrib.auth.models import User
@@ -34,7 +36,9 @@ class Ticket(models.Model):
     )
 
     title = models.CharField(max_length=255)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ticket_created')
+    slug = models.SlugField(blank=True, unique=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ticket_created')
     content = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='ticket_category')
     ticket_id = models.CharField(max_length=255, blank=True)
@@ -56,6 +60,10 @@ class Ticket(models.Model):
             self.ticket_id = generate_ticket_id()
 
         super(Ticket, self).save(*args, **kwargs)
+
+    @property
+    def creator(self):
+        return self.user
 
     @property
     def get_comments(self):
@@ -80,3 +88,11 @@ class Comment(models.Model):
 
     def has_replies(self):
         return Comment.objects.filter(parent=self)
+
+
+def product_pre_save_receiver(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = unique_slug_generator(instance)
+
+
+pre_save.connect(product_pre_save_receiver, sender=Ticket)
