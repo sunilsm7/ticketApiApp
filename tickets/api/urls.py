@@ -1,10 +1,5 @@
-from django.contrib import admin
 from django.urls import path, include
-
-from django.contrib.auth.models import User
-from tickets.models import Ticket, Category
 from rest_framework import routers
-
 from .views import UserViewSet, TicketViewSet, CategoryViewSet, CommentViewSet
 
 # Routers provide an easy way of automatically determining the URL conf.

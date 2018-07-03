@@ -1,7 +1,5 @@
-from django.conf import settings
 from django.contrib.auth.models import User
-from django.shortcuts import render
-from rest_framework import routers, serializers, viewsets
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from tickets.models import Ticket, Category, Comment
 from .serializers import UserSerializer, TicketSerializer, CategorySerializer, CommentSerializer
